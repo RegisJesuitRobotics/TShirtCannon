@@ -1,10 +1,13 @@
 package org.usfirst.frc.team3729.robot.commands;
 
+import org.usfirst.frc.team3729.robot.Servo;
+
 import com.ctre.CANTalon;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -26,6 +29,11 @@ public class TShirtControl implements Runnable {
 	DigitalInput RightMotorDigitalInput = new DigitalInput(2);
 	Side SideThatsFillingUp;
 	boolean startup;
+
+	Servo rcLeftXAxis;
+	Servo rcLeftYAxis;
+	Servo rcChannel5;
+	Servo rcChannel6;
 
 	// true is left false is right
 	enum Side {
@@ -62,6 +70,20 @@ public class TShirtControl implements Runnable {
 
 		doubleSolenoid = new DoubleSolenoid(6, 7);
 
+		NetworkTable table = NetworkTable.getTable("SmartDashboard");
+
+		rcLeftYAxis = new Servo("Left Y Axis", 0, 0.00199155, 0.0010213499999999999);
+		// rcLeftYAxis.setCalibrateTable(table.getSubTable("rcLeftYRaw"));
+
+		rcLeftXAxis = new Servo("Left X Axis", 1, 0.0010213499999999999, 0.0019924);
+		// rcLeftXAxis.setCalibrateTable(table.getSubTable("rcLeftXRaw"));
+
+		rcChannel5 = new Servo("Channel 5", 2, 0.00106915, 0.0019852999999999997);
+		// rcChannel5.setCalibrateTable(table.getSubTable("rcChannel5Raw"));
+
+		rcChannel6 = new Servo("Channel 6", 3, 0.0009891, 0.0020093); // , 0.00106915, 0.0019852999999999997);
+		rcChannel6.setCalibrateTable(table.getSubTable("rcChannel6Raw"));
+
 		// Code Stuff
 		this.playStation = playStation;
 		Limiter = 0.3;
@@ -93,12 +115,67 @@ public class TShirtControl implements Runnable {
 		if (playStation.ButtonShare() == true) {
 			FASTButton();
 		}
-		R1.set(-RightPower * Limiter);
-		R2.set(-RightPower * Limiter);
+		
+		double rcLeftX = rcLeftXAxis.getValue();
+		double rcLeftY = rcLeftYAxis.getValue();
+		double channel5 = rcChannel5.getValue();
+		double channel6 = rcChannel6.getValue();
 
-		L1.set(LeftPower * Limiter);
-		L2.set(LeftPower * Limiter);
+		SmartDashboard.putNumber("RightPower", RightPower);
+		SmartDashboard.putNumber("LeftPower", LeftPower);
+		SmartDashboard.putNumber("LeftTrigger", LeftTrigger);
+		SmartDashboard.putNumber("RightTrigger", RightTrigger);
+		SmartDashboard.putNumber("LeftStick", LeftStick);
+		SmartDashboard.putNumber("effectiveY", Power / 2);
+		SmartDashboard.putNumber("effectiveX", LeftStick);
 
+		double rcLeftX = rcLeftXAxis.getValue();
+		double rcLeftY = rcLeftYAxis.getValue();
+		double channel5 = rcChannel5.getValue();
+		double channel6 = rcChannel6.getValue();
+		double rcRightPower = 0;
+		double rcLeftPower = 0;
+
+		// delta is -4 from x = 0 to x = 1
+		double rcTurn = 2 * rcLeftX;
+		double rcPower = rcLeftY;
+		double rcDeadZone = .1;
+		if (rcLeftX > rcDeadZone) {
+			rcRightPower = rcPower - (rcTurn * rcPower);
+			rcLeftPower = rcPower;
+		} else {
+			if (rcLeftX < -rcDeadZone) {
+				rcLeftPower = rcPower + (rcTurn * rcPower);
+				rcRightPower = rcPower;
+			} else {
+				rcLeftPower = rcPower;
+				rcRightPower = rcPower;
+			}
+		}
+		SmartDashboard.putNumber("rcLeftX", rcLeftX);
+		SmartDashboard.putNumber("rcLeftY", rcLeftY);
+		
+		SmartDashboard.putNumber("rcLeftPower", rcLeftPower);
+		SmartDashboard.putNumber("rcRightPower", rcRightPower);
+		SmartDashboard.putNumber("channel5", channel5);
+		SmartDashboard.putNumber("channel6", channel6);
+		if (channel6 < 0) {
+			R1.set(-RightPower * Limiter);
+			R2.set(-RightPower * Limiter);
+	
+			L1.set(LeftPower * Limiter);
+			L2.set(LeftPower * Limiter);
+		}
+		else {
+			R1.set(-rcRightPower * Limiter);
+			R2.set(-rcRightPower * Limiter);
+	
+			L1.set(rcLeftPower * Limiter);
+			L2.set(rcLeftPower * Limiter);
+			if (channel5 > .7 && isTankCharged()) {
+				SHOOT();
+			}
+		}
 		// System.out.println(Limiter);
 
 	}
