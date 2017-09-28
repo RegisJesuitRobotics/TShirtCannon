@@ -1,16 +1,14 @@
 package org.usfirst.frc.team3729.robot.commands;
 
-import org.usfirst.frc.team3729.robot.Servo;
-
 import com.ctre.CANTalon;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TShirtControl implements Runnable {
 
@@ -25,8 +23,8 @@ public class TShirtControl implements Runnable {
 	double timeBetweenR1Presses = 10;
 	double timeBetweenR1Presses2 = 10;
 	double Limiter;
-	DigitalInput LeftMotorDigitalInput = new DigitalInput(1);
-	DigitalInput RightMotorDigitalInput = new DigitalInput(2);
+	DigitalInput LeftMotorDigitalInput = new DigitalInput(8);
+	DigitalInput RightMotorDigitalInput = new DigitalInput(9);
 	Side SideThatsFillingUp;
 	boolean startup;
 
@@ -129,16 +127,12 @@ public class TShirtControl implements Runnable {
 		SmartDashboard.putNumber("effectiveY", Power / 2);
 		SmartDashboard.putNumber("effectiveX", LeftStick);
 
-		double rcLeftX = rcLeftXAxis.getValue();
-		double rcLeftY = rcLeftYAxis.getValue();
-		double channel5 = rcChannel5.getValue();
-		double channel6 = rcChannel6.getValue();
 		double rcRightPower = 0;
 		double rcLeftPower = 0;
 
 		// delta is -4 from x = 0 to x = 1
 		double rcTurn = 2 * rcLeftX;
-		double rcPower = rcLeftY;
+		double rcPower = 2 * rcLeftY;
 		double rcDeadZone = .1;
 		if (rcLeftX > rcDeadZone) {
 			rcRightPower = rcPower - (rcTurn * rcPower);
@@ -159,7 +153,7 @@ public class TShirtControl implements Runnable {
 		SmartDashboard.putNumber("rcRightPower", rcRightPower);
 		SmartDashboard.putNumber("channel5", channel5);
 		SmartDashboard.putNumber("channel6", channel6);
-		if (channel6 < 0) {
+		if (channel6 > -.8) {
 			R1.set(-RightPower * Limiter);
 			R2.set(-RightPower * Limiter);
 	
