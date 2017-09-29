@@ -207,7 +207,6 @@ public class TShirtControl implements Runnable {
 		}
 
 		CannonMovement cannonMovement = CannonMovement.None;
-		SmartDashboard.putString("CannonMovement", cannonMovement.toString());
 
 		if (channel6 > -.8) {
 			if (playStation.ButtonTriangle() == true) {
@@ -227,12 +226,17 @@ public class TShirtControl implements Runnable {
 				}
 			}
 		}
+		SmartDashboard.putString("CannonMovement", cannonMovement.toString());
 		// Vertical Movement
 
 
 
 		switch (cannonMovement) {
 		case Up:
+			System.out.println(RightMotorDigitalInput.get());
+			System.out.println(LeftMotorDigitalInput.get());
+			ElevationMotorLeft.set(1);
+			ElevationMotorRight.set(-1);
 			break;
 		case Down:
 			System.out.println(RightMotorDigitalInput.get());
