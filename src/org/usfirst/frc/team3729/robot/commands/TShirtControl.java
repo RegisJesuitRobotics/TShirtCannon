@@ -28,14 +28,22 @@ public class TShirtControl implements Runnable {
 	Side SideThatsFillingUp;
 	boolean startup;
 
+	Servo rcRightYAxis;
+
 	Servo rcLeftXAxis;
 	Servo rcLeftYAxis;
 	Servo rcChannel5;
 	Servo rcChannel6;
+	double channel6;
+	double rcCannonAngle;
 
 	// true is left false is right
 	enum Side {
 		LeftSide, RightSide
+	};
+
+	enum CannonMovement {
+		Up, Down, None
 	};
 
 	public TShirtControl(PlaystationController playStation) {
@@ -70,6 +78,9 @@ public class TShirtControl implements Runnable {
 
 		NetworkTable table = NetworkTable.getTable("SmartDashboard");
 
+		rcRightYAxis = new Servo("Left Y Axis", 4, 0.00201015, 0.00100925);
+		rcRightYAxis.setCalibrateTable(table.getSubTable("rcLeftYRaw"));
+
 		rcLeftYAxis = new Servo("Left Y Axis", 0, 0.00199155, 0.0010213499999999999);
 		// rcLeftYAxis.setCalibrateTable(table.getSubTable("rcLeftYRaw"));
 
@@ -79,7 +90,9 @@ public class TShirtControl implements Runnable {
 		rcChannel5 = new Servo("Channel 5", 2, 0.00106915, 0.0019852999999999997);
 		// rcChannel5.setCalibrateTable(table.getSubTable("rcChannel5Raw"));
 
-		rcChannel6 = new Servo("Channel 6", 3, 0.0009891, 0.0020093); // , 0.00106915, 0.0019852999999999997);
+		rcChannel6 = new Servo("Channel 6", 3, 0.0009891, 0.0020093); // ,
+																		// 0.00106915,
+																		// 0.0019852999999999997);
 		rcChannel6.setCalibrateTable(table.getSubTable("rcChannel6Raw"));
 
 		// Code Stuff
@@ -113,17 +126,19 @@ public class TShirtControl implements Runnable {
 		if (playStation.ButtonShare() == true) {
 			FASTButton();
 		}
-		
+
+		rcCannonAngle = rcRightYAxis.getValue();
 		double rcLeftX = rcLeftXAxis.getValue();
-		double rcLeftY = rcLeftYAxis.getValue();
+		double rcLeftY = rcLeftYAxis.getValue() * 2;
 		double channel5 = rcChannel5.getValue();
-		double channel6 = rcChannel6.getValue();
+		channel6 = rcChannel6.getValue();
 
 		SmartDashboard.putNumber("RightPower", RightPower);
 		SmartDashboard.putNumber("LeftPower", LeftPower);
 		SmartDashboard.putNumber("LeftTrigger", LeftTrigger);
 		SmartDashboard.putNumber("RightTrigger", RightTrigger);
 		SmartDashboard.putNumber("LeftStick", LeftStick);
+		SmartDashboard.putNumber("Power", Power);
 		SmartDashboard.putNumber("effectiveY", Power / 2);
 		SmartDashboard.putNumber("effectiveX", LeftStick);
 
@@ -132,7 +147,7 @@ public class TShirtControl implements Runnable {
 
 		// delta is -4 from x = 0 to x = 1
 		double rcTurn = 2 * rcLeftX;
-		double rcPower = 2 * rcLeftY;
+		double rcPower = rcLeftY;
 		double rcDeadZone = .1;
 		if (rcLeftX > rcDeadZone) {
 			rcRightPower = rcPower - (rcTurn * rcPower);
@@ -146,9 +161,13 @@ public class TShirtControl implements Runnable {
 				rcRightPower = rcPower;
 			}
 		}
+		SmartDashboard.putNumber("rcPower", rcPower);
+
+		SmartDashboard.putNumber("rcRightY", rcCannonAngle);
+
 		SmartDashboard.putNumber("rcLeftX", rcLeftX);
-		SmartDashboard.putNumber("rcLeftY", rcLeftY);
-		
+		SmartDashboard.putNumber("rcLeftY", rcLeftY / 2);
+
 		SmartDashboard.putNumber("rcLeftPower", rcLeftPower);
 		SmartDashboard.putNumber("rcRightPower", rcRightPower);
 		SmartDashboard.putNumber("channel5", channel5);
@@ -156,14 +175,13 @@ public class TShirtControl implements Runnable {
 		if (channel6 > -.8) {
 			R1.set(-RightPower * Limiter);
 			R2.set(-RightPower * Limiter);
-	
+
 			L1.set(LeftPower * Limiter);
 			L2.set(LeftPower * Limiter);
-		}
-		else {
+		} else {
 			R1.set(-rcRightPower * Limiter);
 			R2.set(-rcRightPower * Limiter);
-	
+
 			L1.set(rcLeftPower * Limiter);
 			L2.set(rcLeftPower * Limiter);
 			if (channel5 > .7 && isTankCharged()) {
@@ -188,23 +206,44 @@ public class TShirtControl implements Runnable {
 			TurningMotor.set(0);
 		}
 
+		CannonMovement cannonMovement = CannonMovement.None;
+		SmartDashboard.putString("CannonMovement", cannonMovement.toString());
+
+		if (channel6 > -.8) {
+			if (playStation.ButtonTriangle() == true) {
+				cannonMovement = CannonMovement.Up;
+
+			} else if (playStation.ButtonX() == true) {
+				cannonMovement = CannonMovement.Down;
+			}
+		}
+		else {
+			if (rcCannonAngle > .5) {
+				cannonMovement = CannonMovement.Up;
+			}
+			else {
+				if (rcCannonAngle < -.5) {
+					cannonMovement = CannonMovement.Down;
+				}
+			}
+		}
 		// Vertical Movement
-		if (playStation.ButtonTriangle() == true) {
 
-			System.out.println(RightMotorDigitalInput.get());
-			System.out.println(LeftMotorDigitalInput.get());
-			ElevationMotorLeft.set(1);
-			ElevationMotorRight.set(-1);
 
-		} else if (playStation.ButtonX() == true) {
+
+		switch (cannonMovement) {
+		case Up:
+			break;
+		case Down:
 			System.out.println(RightMotorDigitalInput.get());
 			System.out.println(LeftMotorDigitalInput.get());
 			ElevationMotorLeft.set(-1);
 			ElevationMotorRight.set(1);
-
-		} else {
+			break;
+		default:
 			ElevationMotorLeft.set(0);
 			ElevationMotorRight.set(0);
+			break;
 		}
 	}
 
@@ -221,6 +260,8 @@ public class TShirtControl implements Runnable {
 		// Barrel[2].set(true);
 		// Barrel[5].set(true);
 		// }else{
+		SmartDashboard.putNumber("fireBarrel", ActiveBarrel);
+
 		System.out.print("test G");
 		Barrel[ActiveBarrel].set(false);
 		SwitchBarrel();
@@ -318,7 +359,7 @@ public class TShirtControl implements Runnable {
 
 	public void setTankCharged(boolean tankCharged) {
 		this.tankCharged = tankCharged;
-		SmartDashboard.putBoolean("Dashboard Charging", tankCharged);
+		SmartDashboard.putBoolean("tankCharged", tankCharged);
 	}
 
 	public void StartTimer() {
