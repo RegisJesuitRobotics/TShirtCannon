@@ -192,6 +192,10 @@ public class TShirtControl implements Runnable {
 
 	}
 
+	public Servo getRcChannel6() {
+		return rcChannel6;
+	}
+
 	public void CannonMovement() {
 		// Horizontal Movement
 		if (playStation.ButtonSquare() == true) {

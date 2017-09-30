@@ -7,6 +7,7 @@ import org.usfirst.frc.team3729.robot.commands.PlaystationController;
 import org.usfirst.frc.team3729.robot.commands.TShirtControl;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -17,7 +18,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
  */
 public class Robot extends IterativeRobot {
 
-	
 	Date LastPush = new Date();
 	Date LastPush2 = new Date();
 	Date LastPush3 = new Date();
@@ -25,16 +25,28 @@ public class Robot extends IterativeRobot {
 	Date now2 = new Date();
 	Date now3 = new Date();
 
+	boolean rcMaster = false;
+
 	PlaystationController playStation;
 	TShirtControl tShirtControl;
 	boolean isShooting, isShootEnabled;
-
+	double channel6Value;
+	
 	@Override
 	public void robotInit() {
 
 		playStation = new PlaystationController(0);
 		tShirtControl = new TShirtControl(playStation);
 		isShooting = false;
+		channel6Value = tShirtControl.getRcChannel6().getValue();
+		System.out.println("channel6Value " + channel6Value);
+		SmartDashboard.putBoolean("rcControlThreadActive", false);
+
+		if (channel6Value > -.5) {
+			System.out.println("Enabling NO DIRVESTATION MODE!!!!");
+			rcMaster = true;
+			new Thread(new NoDriveStation(this)).start();
+		}
 
 	}
 
@@ -81,24 +93,23 @@ public class Robot extends IterativeRobot {
 		// isShootEnabled = true;
 	}
 
-	@Override
-	public void teleopPeriodic() {
-
-		double timeBetweenPresses = 300;
-		double oversample = 50;
-
+	public void runCannon() {
 		double timeBetweenPresses2 = 300;
-		double timeBetweenPresses3 = 300;
 		double oversample2 = 50;
-		double oversample3 = 50;
+
+		if (channel6Value > -.5) {
+			System.out.println("Enabling NO DIRVESTATION MODE!!!!");
+			rcMaster = false;
+		}
+
 		tShirtControl.TShirtDrive();
 		tShirtControl.CannonMovement();
 		tShirtControl.charging();
-
+		
 		// SHOOT TIMER
 
 		if (playStation.ButtonL1() && tShirtControl.isTankCharged()) {
-				tShirtControl.SHOOT();
+			tShirtControl.SHOOT();
 
 		}
 
@@ -113,13 +124,13 @@ public class Robot extends IterativeRobot {
 			}
 
 		}
-		
 
+	}
 
-		}
-
-
-	
+	@Override
+	public void teleopPeriodic() {
+		runCannon();
+	}
 
 	@Override
 	public void testPeriodic() {
