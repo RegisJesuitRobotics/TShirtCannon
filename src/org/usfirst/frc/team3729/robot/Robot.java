@@ -42,7 +42,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("channel6Value " + channel6Value);
 		SmartDashboard.putBoolean("rcControlThreadActive", false);
 
-		if (channel6Value > -.5) {
+		if (channel6Value < 0) {
 			System.out.println("Enabling NO DIRVESTATION MODE!!!!");
 			rcMaster = true;
 			new Thread(new NoDriveStation(this)).start();
@@ -97,8 +97,7 @@ public class Robot extends IterativeRobot {
 		double timeBetweenPresses2 = 300;
 		double oversample2 = 50;
 
-		if (channel6Value > -.5) {
-			System.out.println("Enabling NO DIRVESTATION MODE!!!!");
+		if (channel6Value >= 0) {
 			rcMaster = false;
 		}
 
