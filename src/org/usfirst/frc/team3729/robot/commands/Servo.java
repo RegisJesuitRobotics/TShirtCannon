@@ -32,13 +32,10 @@ public class Servo extends DigitalInput {
 		this(name, channel);
 		this.topValue = topValue;
 		this.bottomValue = bottomValue;
-		zeroValue = topValue - (topValue-bottomValue)/2;
+		zeroValue = topValue - (topValue - bottomValue) / 2;
 		topDelta = topValue - zeroValue;
 		bottomDelta = zeroValue - bottomValue;
-		
-	}
-	public String getName() {
-		return name;
+
 	}
 
 	public void setCalibrateTable(ITable calibrateTable) {

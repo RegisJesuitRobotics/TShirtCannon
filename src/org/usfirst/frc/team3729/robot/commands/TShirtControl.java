@@ -1,20 +1,18 @@
 package org.usfirst.frc.team3729.robot.commands;
 
-import com.ctre.CANTalon;
-
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TShirtControl implements Runnable {
 
 	boolean tankCharged;
 
-	CANTalon L1, L2, L3, R1, R2, R3, TurningMotor, ElevationMotorLeft, ElevationMotorRight;
+	WPI_TalonSRX L1, L2, L3, R1, R2, R3, TurningMotor, ElevationMotorLeft, ElevationMotorRight;
 	PlaystationController playStation;
 	DriverStation driverStation;
 	Solenoid[] Barrel;
@@ -48,17 +46,17 @@ public class TShirtControl implements Runnable {
 
 	public TShirtControl(PlaystationController playStation) {
 		// Movement Motors. R=Right,L=Left, Number = Distance from front.
-		L1 = new CANTalon(4);
-		L2 = new CANTalon(3);
-		R1 = new CANTalon(2);
-		R2 = new CANTalon(1);
+		L1 = new WPI_TalonSRX(4);
+		L2 = new WPI_TalonSRX(3);
+		R1 = new WPI_TalonSRX(2);
+		R2 = new WPI_TalonSRX(1);
 
 		playStation = new PlaystationController(0);
 
 		// Cannon Stuff
-		TurningMotor = new CANTalon(7);
-		ElevationMotorLeft = new CANTalon(5);
-		ElevationMotorRight = new CANTalon(6);
+		TurningMotor = new WPI_TalonSRX(7);
+		ElevationMotorLeft = new WPI_TalonSRX(5);
+		ElevationMotorRight = new WPI_TalonSRX(6);
 
 		// Solenoid Stuff
 
@@ -76,10 +74,10 @@ public class TShirtControl implements Runnable {
 
 		doubleSolenoid = new DoubleSolenoid(6, 7);
 
-		NetworkTable table = NetworkTable.getTable("SmartDashboard");
+		// NetworkTable table = NetworkTable.getTable("SmartDashboard");
 
 		rcRightYAxis = new Servo("Left Y Axis", 4, 0.00201015, 0.00100925);
-		rcRightYAxis.setCalibrateTable(table.getSubTable("rcLeftYRaw"));
+		// rcRightYAxis.setCalibrateTable(table.getSubTable("rcLeftYRaw"));
 
 		rcLeftYAxis = new Servo("Left Y Axis", 0, 0.00199155, 0.0010213499999999999);
 		// rcLeftYAxis.setCalibrateTable(table.getSubTable("rcLeftYRaw"));
@@ -93,7 +91,7 @@ public class TShirtControl implements Runnable {
 		rcChannel6 = new Servo("Channel 6", 3, 0.0009891, 0.0020093); // ,
 																		// 0.00106915,
 																		// 0.0019852999999999997);
-		rcChannel6.setCalibrateTable(table.getSubTable("rcChannel6Raw"));
+		// rcChannel6.setCalibrateTable(table.getSubTable("rcChannel6Raw"));
 
 		// Code Stuff
 		this.playStation = playStation;
@@ -219,12 +217,10 @@ public class TShirtControl implements Runnable {
 			} else if (playStation.ButtonX() == true) {
 				cannonMovement = CannonMovement.Down;
 			}
-		}
-		else {
+		} else {
 			if (rcCannonAngle > .5) {
 				cannonMovement = CannonMovement.Up;
-			}
-			else {
+			} else {
 				if (rcCannonAngle < -.5) {
 					cannonMovement = CannonMovement.Down;
 				}
@@ -232,8 +228,6 @@ public class TShirtControl implements Runnable {
 		}
 		SmartDashboard.putString("CannonMovement", cannonMovement.toString());
 		// Vertical Movement
-
-
 
 		switch (cannonMovement) {
 		case Up:
