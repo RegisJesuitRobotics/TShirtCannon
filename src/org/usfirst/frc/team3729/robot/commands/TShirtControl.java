@@ -12,8 +12,7 @@ public class TShirtControl implements Runnable {
 
 	boolean tankCharged;
 
-	// WPI_TalonSRX L1, L2, L3, R1, R2, R3, TurningMotor, ElevationMotorLeft,
-	// ElevationMotorRight;
+	WPI_TalonSRX L1, L2, L3, R1, R2, R3, TurningMotor, ElevationMotorLeft, ElevationMotorRight;
 	PlaystationController playStation;
 	DriverStation driverStation;
 	Solenoid[] Barrel;
@@ -47,17 +46,17 @@ public class TShirtControl implements Runnable {
 
 	public TShirtControl(PlaystationController playStation) {
 		// Movement Motors. R=Right,L=Left, Number = Distance from front.
-		// L1 = new WPI_TalonSRX(4);
-		// L2 = new WPI_TalonSRX(3);
-		// R1 = new WPI_TalonSRX(2);
-		// R2 = new WPI_TalonSRX(1);
+		L1 = new WPI_TalonSRX(4);
+		L2 = new WPI_TalonSRX(3);
+		R1 = new WPI_TalonSRX(2);
+		R2 = new WPI_TalonSRX(1);
 
 		playStation = new PlaystationController(0);
 
 		// Cannon Stuff
-		// TurningMotor = new WPI_TalonSRX(7);
-		// ElevationMotorLeft = new WPI_TalonSRX(5);
-		// ElevationMotorRight = new WPI_TalonSRX(6);
+		TurningMotor = new WPI_TalonSRX(7);
+		ElevationMotorLeft = new WPI_TalonSRX(5);
+		ElevationMotorRight = new WPI_TalonSRX(6);
 
 		// Solenoid Stuff
 
@@ -171,22 +170,22 @@ public class TShirtControl implements Runnable {
 		SmartDashboard.putNumber("rcRightPower", rcRightPower);
 		SmartDashboard.putNumber("channel5", channel5);
 		SmartDashboard.putNumber("channel6", channel6);
-		// if (channel6 > -.8) {
-		// R1.set(-RightPower * Limiter);
-		// R2.set(-RightPower * Limiter);
-		//
-		// L1.set(LeftPower * Limiter);
-		// L2.set(LeftPower * Limiter);
-		// } else {
-		// R1.set(-rcRightPower * Limiter);
-		// R2.set(-rcRightPower * Limiter);
-		//
-		// L1.set(rcLeftPower * Limiter);
-		// L2.set(rcLeftPower * Limiter);
-		// if (channel5 > .7 && isTankCharged()) {
-		// SHOOT();
-		// }
-		// }
+		if (channel6 > -.8) {
+			R1.set(-RightPower * Limiter);
+			R2.set(-RightPower * Limiter);
+
+			L1.set(LeftPower * Limiter);
+			L2.set(LeftPower * Limiter);
+		} else {
+			R1.set(-rcRightPower * Limiter);
+			R2.set(-rcRightPower * Limiter);
+
+			L1.set(rcLeftPower * Limiter);
+			L2.set(rcLeftPower * Limiter);
+			if (channel5 > .7 && isTankCharged()) {
+				SHOOT();
+			}
+		}
 		// System.out.println(Limiter);
 
 	}
@@ -195,60 +194,60 @@ public class TShirtControl implements Runnable {
 		return rcChannel6;
 	}
 
-	// public void CannonMovement() {
-	// // Horizontal Movement
-	// if (playStation.ButtonSquare() == true) {
-	// TurningMotor.set(1);
-	// System.out.println("Turning");
-	//
-	// } else if (playStation.ButtonCircle() == true) {
-	// TurningMotor.set(-1);
-	// System.out.println("turning 2");
-	//
-	// } else {
-	// TurningMotor.set(0);
-	// }
-	//
-	// CannonMovement cannonMovement = CannonMovement.None;
-	//
-	// if (channel6 > -.8) {
-	// if (playStation.ButtonTriangle() == true) {
-	// cannonMovement = CannonMovement.Up;
-	//
-	// } else if (playStation.ButtonX() == true) {
-	// cannonMovement = CannonMovement.Down;
-	// }
-	// } else {
-	// if (rcCannonAngle > .5) {
-	// cannonMovement = CannonMovement.Up;
-	// } else {
-	// if (rcCannonAngle < -.5) {
-	// cannonMovement = CannonMovement.Down;
-	// }
-	// }
-	// }
-	// SmartDashboard.putString("CannonMovement", cannonMovement.toString());
-	// // Vertical Movement
-	//
-	// switch (cannonMovement) {
-	// case Up:
-	// System.out.println(RightMotorDigitalInput.get());
-	// System.out.println(LeftMotorDigitalInput.get());
-	// ElevationMotorLeft.set(1);
-	// ElevationMotorRight.set(-1);
-	// break;
-	// case Down:
-	// System.out.println(RightMotorDigitalInput.get());
-	// System.out.println(LeftMotorDigitalInput.get());
-	// ElevationMotorLeft.set(-1);
-	// ElevationMotorRight.set(1);
-	// break;
-	// default:
-	// ElevationMotorLeft.set(0);
-	// ElevationMotorRight.set(0);
-	// break;
-	// }
-	// }
+	public void CannonMovement() {
+		// Horizontal Movement
+		if (playStation.ButtonSquare() == true) {
+			TurningMotor.set(1);
+			System.out.println("Turning");
+
+		} else if (playStation.ButtonCircle() == true) {
+			TurningMotor.set(-1);
+			System.out.println("turning 2");
+
+		} else {
+			TurningMotor.set(0);
+		}
+
+		CannonMovement cannonMovement = CannonMovement.None;
+
+		if (channel6 > -.8) {
+			if (playStation.ButtonTriangle() == true) {
+				cannonMovement = CannonMovement.Up;
+
+			} else if (playStation.ButtonX() == true) {
+				cannonMovement = CannonMovement.Down;
+			}
+		} else {
+			if (rcCannonAngle > .5) {
+				cannonMovement = CannonMovement.Up;
+			} else {
+				if (rcCannonAngle < -.5) {
+					cannonMovement = CannonMovement.Down;
+				}
+			}
+		}
+		SmartDashboard.putString("CannonMovement", cannonMovement.toString());
+		// Vertical Movement
+
+		switch (cannonMovement) {
+		case Up:
+			System.out.println(RightMotorDigitalInput.get());
+			System.out.println(LeftMotorDigitalInput.get());
+			ElevationMotorLeft.set(1);
+			ElevationMotorRight.set(-1);
+			break;
+		case Down:
+			System.out.println(RightMotorDigitalInput.get());
+			System.out.println(LeftMotorDigitalInput.get());
+			ElevationMotorLeft.set(-1);
+			ElevationMotorRight.set(1);
+			break;
+		default:
+			ElevationMotorLeft.set(0);
+			ElevationMotorRight.set(0);
+			break;
+		}
+	}
 
 	public void charging() {
 
