@@ -231,14 +231,10 @@ public class TShirtControl implements Runnable {
 
 		switch (cannonMovement) {
 		case Up:
-			System.out.println(RightMotorDigitalInput.get());
-			System.out.println(LeftMotorDigitalInput.get());
 			ElevationMotorLeft.set(1);
 			ElevationMotorRight.set(-1);
 			break;
 		case Down:
-			System.out.println(RightMotorDigitalInput.get());
-			System.out.println(LeftMotorDigitalInput.get());
 			ElevationMotorLeft.set(-1);
 			ElevationMotorRight.set(1);
 			break;
@@ -264,8 +260,9 @@ public class TShirtControl implements Runnable {
 		// }else{
 		SmartDashboard.putNumber("fireBarrel", ActiveBarrel);
 
-		System.out.print("test G");
+		System.out.println("Shoot Button has been pushed ");
 		Barrel[ActiveBarrel].set(false);
+
 		SwitchBarrel();
 		StartTimer();
 		// }
@@ -288,7 +285,7 @@ public class TShirtControl implements Runnable {
 	// DONT PUT THIS CODE IN THE ROBOT.JAVA, ITS ALLREADY CALLED BY
 	// SHOOTTIMERANDSHOOT!!!!!! >:(
 	public void SwitchBarrel() {
-		System.out.println(ActiveBarrel);
+		System.out.println("Active Barrel " + ActiveBarrel);
 		Barrel[ActiveBarrel].set(true);
 		// 1634 then 2+5
 		if (ActiveBarrel == 0) {
@@ -326,7 +323,7 @@ public class TShirtControl implements Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("Runnable Start");
+		System.out.println("Tank charge Runnable Start");
 		try {
 			setTankCharged(false);
 			if (SideThatsFillingUp == Side.LeftSide || startup) {
@@ -346,7 +343,7 @@ public class TShirtControl implements Runnable {
 			setTankCharged(true);
 			startup = false;
 
-			System.out.println("Runnable End");
+			System.out.println("Tank charge Runnable End");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 
