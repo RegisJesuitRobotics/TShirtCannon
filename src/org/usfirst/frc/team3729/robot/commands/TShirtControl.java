@@ -2,6 +2,7 @@ package org.usfirst.frc.team3729.robot.commands;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -18,11 +19,12 @@ public class TShirtControl implements Runnable {
 	Solenoid[] Barrel;
 	DoubleSolenoid doubleSolenoid;
 	int ActiveBarrel;
+	int waitTime = 4000;
 	double timeBetweenR1Presses = 10;
 	double timeBetweenR1Presses2 = 10;
 	double Limiter;
-	DigitalInput LeftMotorDigitalInput = new DigitalInput(8);
-	DigitalInput RightMotorDigitalInput = new DigitalInput(9);
+	//DigitalInput LeftMotorDigitalInput = new DigitalInput(8);
+	//DigitalInput RightMotorDigitalInput = new DigitalInput(9);
 	Side SideThatsFillingUp;
 	boolean startup;
 
@@ -67,6 +69,8 @@ public class TShirtControl implements Runnable {
 		Barrel[3] = new Solenoid(3);
 		Barrel[4] = new Solenoid(4);
 		Barrel[5] = new Solenoid(5);
+		
+
 		ActiveBarrel = 0;
 
 		SideThatsFillingUp = Side.LeftSide;// Left Filling
@@ -100,6 +104,8 @@ public class TShirtControl implements Runnable {
 	}
 
 	public void TShirtDrive() {
+		
+		
 		double RightTrigger = playStation.RightTrigger();
 		double LeftTrigger = playStation.LeftTrigger();
 		double LeftStick = playStation.LeftStickXAxis();
@@ -124,7 +130,9 @@ public class TShirtControl implements Runnable {
 		if (playStation.ButtonShare() == true) {
 			FASTButton();
 		}
-
+		
+		
+		
 		rcCannonAngle = rcRightYAxis.getValue();
 		double rcLeftX = rcLeftXAxis.getValue();
 		double rcLeftY = rcLeftYAxis.getValue() * 2;
@@ -186,6 +194,15 @@ public class TShirtControl implements Runnable {
 				SHOOT();
 			}
 		}
+		if (tankCharged) {
+			System.out.println("Tank charged, light should be on");
+			TurningMotor.set(1.0);
+		}
+		else {
+			System.out.println("Tank NOT charged, light should be off");
+			TurningMotor.set(0.0);
+			
+		}
 		// System.out.println(Limiter);
 
 	}
@@ -196,17 +213,17 @@ public class TShirtControl implements Runnable {
 
 	public void CannonMovement() {
 		// Horizontal Movement
-		if (playStation.ButtonSquare() == true) {
-			TurningMotor.set(1);
-			System.out.println("Turning");
-
-		} else if (playStation.ButtonCircle() == true) {
-			TurningMotor.set(-1);
-			System.out.println("turning 2");
-
-		} else {
-			TurningMotor.set(0);
-		}
+//		if (playStation.ButtonSquare() == true) {
+//			TurningMotor.set(1);
+//			System.out.println("Turning");
+//
+//		} else if (playStation.ButtonCircle() == true) {
+//			TurningMotor.set(-1);
+//			System.out.println("turning 2");
+//
+//		} else {
+//			TurningMotor.set(0);
+//		}
 
 		CannonMovement cannonMovement = CannonMovement.None;
 
@@ -330,14 +347,14 @@ public class TShirtControl implements Runnable {
 				// If the left side is shooting
 				doubleSolenoid.set(Value.kForward);
 				System.out.println("Charging " + SideThatsFillingUp);
-				Thread.sleep(5000);
+				Thread.sleep(waitTime);
 
 			}
 			if (SideThatsFillingUp == Side.RightSide || startup) {
 				// If right side is shooting
 				doubleSolenoid.set(Value.kReverse);
 				System.out.println("Charging " + SideThatsFillingUp);
-				Thread.sleep(5000);
+				Thread.sleep(waitTime);
 
 			}
 			setTankCharged(true);
