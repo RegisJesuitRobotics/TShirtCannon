@@ -23,8 +23,8 @@ public class TShirtControl implements Runnable {
 	double timeBetweenR1Presses = 10;
 	double timeBetweenR1Presses2 = 10;
 	double Limiter;
-	//DigitalInput LeftMotorDigitalInput = new DigitalInput(8);
-	//DigitalInput RightMotorDigitalInput = new DigitalInput(9);
+	// DigitalInput LeftMotorDigitalInput = new DigitalInput(8);
+	// DigitalInput RightMotorDigitalInput = new DigitalInput(9);
 	Side SideThatsFillingUp;
 	boolean startup;
 
@@ -69,7 +69,11 @@ public class TShirtControl implements Runnable {
 		Barrel[3] = new Solenoid(3);
 		Barrel[4] = new Solenoid(4);
 		Barrel[5] = new Solenoid(5);
-		
+
+		//Setting pulse duration for all barrels
+		for (Solenoid setSolenoid : Barrel) {
+			setSolenoid.setPulseDuration(2.55);
+		}
 
 		ActiveBarrel = 0;
 
@@ -104,8 +108,7 @@ public class TShirtControl implements Runnable {
 	}
 
 	public void TShirtDrive() {
-		
-		
+
 		double RightTrigger = playStation.RightTrigger();
 		double LeftTrigger = playStation.LeftTrigger();
 		double LeftStick = playStation.LeftStickXAxis();
@@ -130,9 +133,7 @@ public class TShirtControl implements Runnable {
 		if (playStation.ButtonShare() == true) {
 			FASTButton();
 		}
-		
-		
-		
+
 		rcCannonAngle = rcRightYAxis.getValue();
 		double rcLeftX = rcLeftXAxis.getValue();
 		double rcLeftY = rcLeftYAxis.getValue() * 2;
@@ -197,11 +198,10 @@ public class TShirtControl implements Runnable {
 		if (tankCharged) {
 			System.out.println("Tank charged, light should be on");
 			TurningMotor.set(1.0);
-		}
-		else {
+		} else {
 			System.out.println("Tank NOT charged, light should be off");
 			TurningMotor.set(0.0);
-			
+
 		}
 		// System.out.println(Limiter);
 
@@ -213,17 +213,17 @@ public class TShirtControl implements Runnable {
 
 	public void CannonMovement() {
 		// Horizontal Movement
-//		if (playStation.ButtonSquare() == true) {
-//			TurningMotor.set(1);
-//			System.out.println("Turning");
-//
-//		} else if (playStation.ButtonCircle() == true) {
-//			TurningMotor.set(-1);
-//			System.out.println("turning 2");
-//
-//		} else {
-//			TurningMotor.set(0);
-//		}
+		// if (playStation.ButtonSquare() == true) {
+		// TurningMotor.set(1);
+		// System.out.println("Turning");
+		//
+		// } else if (playStation.ButtonCircle() == true) {
+		// TurningMotor.set(-1);
+		// System.out.println("turning 2");
+		//
+		// } else {
+		// TurningMotor.set(0);
+		// }
 
 		CannonMovement cannonMovement = CannonMovement.None;
 
@@ -278,8 +278,8 @@ public class TShirtControl implements Runnable {
 		SmartDashboard.putNumber("fireBarrel", ActiveBarrel);
 
 		System.out.println("Shoot Button has been pushed ");
-		Barrel[ActiveBarrel].set(false);
-
+		// Barrel[ActiveBarrel].set(false);
+		Barrel[ActiveBarrel].startPulse();
 		SwitchBarrel();
 		StartTimer();
 		// }
